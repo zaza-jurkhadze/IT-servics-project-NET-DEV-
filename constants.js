@@ -8,7 +8,7 @@ export const LOGO_PUBLIC_URL = "/logo.png";
 export const LOGO_WIDTH = 520;
 export const LOGO_HEIGHT = 190;
 
-export const CONTACT_EMAIL = "z.jurkhadze@gmail.com";
+export const CONTACT_EMAIL = "info@techsolgeorgia.com";
 export const FORMSUBMIT_ACTION = `https://formsubmit.co/${CONTACT_EMAIL}`;
 
 /** შეცვალეთ რეალური ნომერი და ბმულები გაშვებამდე */
