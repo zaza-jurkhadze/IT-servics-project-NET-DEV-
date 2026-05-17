@@ -1,9 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useLang } from "@/context/LangContext";
-import { CONTACT_EMAIL, FORMSUBMIT_ACTION } from "@/constants";
+import {
+  CONTACT_EMAIL,
+  WEB3FORMS_ACCESS_KEY,
+  WEB3FORMS_ACTION,
+} from "@/constants";
 
 const VALID_PLANS = new Set([
   "basic",
@@ -27,6 +31,14 @@ export default function PackageRequestClient({ planKey: rawPlan, sentOk }) {
   const { t, lang } = useLang();
   const planKey = VALID_PLANS.has(rawPlan) ? rawPlan : "basic";
   const planLabel = t(`pkg.plan.${planKey}`);
+  const redirectFieldRef = useRef(null);
+
+  useEffect(() => {
+    const base = `${window.location.origin}/package-request`;
+    if (redirectFieldRef.current) {
+      redirectFieldRef.current.value = `${base}?plan=${planKey}&sent=1`;
+    }
+  }, [planKey]);
 
   useEffect(() => {
     document.title = `${t("pkg.doc.title")} | TechSol Georgia`;
@@ -107,13 +119,22 @@ export default function PackageRequestClient({ planKey: rawPlan, sentOk }) {
             ) : null}
           </div>
 
-          <form className="contact-form" action={FORMSUBMIT_ACTION} method="POST">
-            <input type="hidden" name="_subject" value={mailSubject} />
-            <input type="hidden" name="_template" value="table" />
-            <input type="hidden" name="_captcha" value="false" />
+          <form className="contact-form" action={WEB3FORMS_ACTION} method="POST">
             <input
-              type="text"
-              name="_honey"
+              type="hidden"
+              name="access_key"
+              value={WEB3FORMS_ACCESS_KEY}
+            />
+            <input
+              ref={redirectFieldRef}
+              type="hidden"
+              name="redirect"
+              defaultValue=""
+            />
+            <input type="hidden" name="subject" value={mailSubject} />
+            <input
+              type="checkbox"
+              name="botcheck"
               style={{ display: "none" }}
               tabIndex={-1}
               autoComplete="off"
