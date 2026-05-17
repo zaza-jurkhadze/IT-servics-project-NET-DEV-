@@ -22,6 +22,6 @@ export const SOCIAL_LINKS = {
   facebook: "https://www.facebook.com/61572854547229",
   messenger: "https://m.me/1002193936312878",
   linkedin: "https://www.linkedin.com/company/techsol-georgia",
-  instagram: "https://www.instagram.com/techsol_georgia",
+  instagram: "https://www.instagram.com/techsol.georgia",
   whatsapp: `https://wa.me/${CONTACT_PHONE_TEL.replace(/\D/g, "")}`,
 };
