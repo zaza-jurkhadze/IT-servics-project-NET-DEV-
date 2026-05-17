@@ -31,6 +31,7 @@ export default function PackageRequestClient({ planKey: rawPlan }) {
   const [formSent, setFormSent] = useState(false);
   const [formError, setFormError] = useState(false);
   const [formSubmitting, setFormSubmitting] = useState(false);
+  const [formKey, setFormKey] = useState(0);
 
   useEffect(() => {
     document.title = `${t("pkg.doc.title")} | TechSol Georgia`;
@@ -61,11 +62,7 @@ export default function PackageRequestClient({ planKey: rawPlan }) {
     try {
       await submitWeb3Form(e.currentTarget);
       setFormSent(true);
-      try {
-        e.currentTarget.reset();
-      } catch {
-        /* reset optional */
-      }
+      setFormKey((k) => k + 1);
     } catch {
       setFormError(true);
     } finally {
@@ -141,7 +138,11 @@ export default function PackageRequestClient({ planKey: rawPlan }) {
             ) : null}
           </div>
 
-          <form className="contact-form" onSubmit={handlePackageSubmit}>
+          <form
+            key={formKey}
+            className="contact-form"
+            onSubmit={handlePackageSubmit}
+          >
             <input
               type="hidden"
               name="access_key"
