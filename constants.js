@@ -9,7 +9,10 @@ export const LOGO_WIDTH = 520;
 export const LOGO_HEIGHT = 190;
 
 export const CONTACT_EMAIL = "info@techsolgeorgia.com";
-export const FORMSUBMIT_ACTION = `https://formsubmit.co/${CONTACT_EMAIL}`;
+
+/** Web3Forms — https://web3forms.com */
+export const WEB3FORMS_ACCESS_KEY = "acba1ea0-3e1a-402d-badb-1a3c669471fa";
+export const WEB3FORMS_ACTION = "https://api.web3forms.com/submit";
 
 /** შეცვალეთ რეალური ნომერი და ბმულები გაშვებამდე */
 export const CONTACT_PHONE_DISPLAY = "+995 595 53 10 07";
