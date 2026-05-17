@@ -60,8 +60,12 @@ export default function PackageRequestClient({ planKey: rawPlan }) {
 
     try {
       await submitWeb3Form(e.currentTarget);
-      e.currentTarget.reset();
       setFormSent(true);
+      try {
+        e.currentTarget.reset();
+      } catch {
+        /* reset optional */
+      }
     } catch {
       setFormError(true);
     } finally {
@@ -154,7 +158,12 @@ export default function PackageRequestClient({ planKey: rawPlan }) {
 
             <label>
               <span>{t("pkg.form.package")}</span>
-              <input type="text" name="selected_package" value={planLabel} readOnly />
+              <input
+                type="text"
+                name="selected_package"
+                defaultValue={planLabel}
+                readOnly
+              />
             </label>
             <label>
               <span>{t("form.name")}</span>
