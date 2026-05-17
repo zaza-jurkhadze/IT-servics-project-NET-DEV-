@@ -79,8 +79,12 @@ export default function Home() {
 
     try {
       await submitWeb3Form(e.currentTarget);
-      e.currentTarget.reset();
       setFormSent(true);
+      try {
+        e.currentTarget.reset();
+      } catch {
+        /* reset optional */
+      }
     } catch {
       setFormError(true);
     } finally {
