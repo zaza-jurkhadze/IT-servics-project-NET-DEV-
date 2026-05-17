@@ -4,7 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useLang } from "@/context/LangContext";
-import { CONTACT_EMAIL, FORMSUBMIT_ACTION } from "@/constants";
+import {
+  CONTACT_EMAIL,
+  WEB3FORMS_ACCESS_KEY,
+  WEB3FORMS_ACTION,
+} from "@/constants";
 
 const PRICE_BASIC_KEYS = [1, 2, 3, 4, 5, 6];
 const PRICE_STD_KEYS = [1, 2, 3, 4, 5, 6, 7, 8];
@@ -33,8 +37,7 @@ function scrollToHashFromLocation() {
 
 export default function Home() {
   const { t, lang } = useLang();
-  const urlFieldRef = useRef(null);
-  const nextFieldRef = useRef(null);
+  const redirectFieldRef = useRef(null);
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const sentOk = searchParams.get("sent") === "1";
@@ -53,11 +56,8 @@ export default function Home() {
 
   useEffect(() => {
     const base = `${window.location.origin}${window.location.pathname}`;
-    if (urlFieldRef.current) {
-      urlFieldRef.current.value = base.split("#")[0];
-    }
-    if (nextFieldRef.current) {
-      nextFieldRef.current.value = `${base.split("#")[0]}?sent=1#კონტაქტი`;
+    if (redirectFieldRef.current) {
+      redirectFieldRef.current.value = `${base.split("#")[0]}?sent=1#კონტაქტი`;
     }
   }, []);
 
@@ -396,17 +396,24 @@ export default function Home() {
           </div>
           <form
             className="contact-form"
-            action={FORMSUBMIT_ACTION}
+            action={WEB3FORMS_ACTION}
             method="POST"
           >
-            <input ref={urlFieldRef} type="hidden" name="_url" defaultValue="" />
-            <input ref={nextFieldRef} type="hidden" name="_next" defaultValue="" />
-            <input type="hidden" name="_subject" value={subject} />
-            <input type="hidden" name="_template" value="table" />
-            <input type="hidden" name="_captcha" value="false" />
             <input
-              type="text"
-              name="_honey"
+              type="hidden"
+              name="access_key"
+              value={WEB3FORMS_ACCESS_KEY}
+            />
+            <input
+              ref={redirectFieldRef}
+              type="hidden"
+              name="redirect"
+              defaultValue=""
+            />
+            <input type="hidden" name="subject" value={subject} />
+            <input
+              type="checkbox"
+              name="botcheck"
               style={{ display: "none" }}
               tabIndex={-1}
               autoComplete="off"
