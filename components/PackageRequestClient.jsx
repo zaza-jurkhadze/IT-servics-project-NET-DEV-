@@ -1,13 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useLang } from "@/context/LangContext";
-import {
-  CONTACT_EMAIL,
-  WEB3FORMS_ACCESS_KEY,
-  WEB3FORMS_ACTION,
-} from "@/constants";
+import { CONTACT_EMAIL, WEB3FORMS_ACCESS_KEY } from "@/constants";
+import { submitWeb3Form } from "@/lib/web3forms";
 
 const VALID_PLANS = new Set([
   "basic",
@@ -27,18 +24,13 @@ const INC_COUNT = {
   aiauto: 4,
 };
 
-export default function PackageRequestClient({ planKey: rawPlan, sentOk }) {
+export default function PackageRequestClient({ planKey: rawPlan }) {
   const { t, lang } = useLang();
   const planKey = VALID_PLANS.has(rawPlan) ? rawPlan : "basic";
   const planLabel = t(`pkg.plan.${planKey}`);
-  const redirectFieldRef = useRef(null);
-
-  useEffect(() => {
-    const base = `${window.location.origin}/package-request`;
-    if (redirectFieldRef.current) {
-      redirectFieldRef.current.value = `${base}?plan=${planKey}&sent=1`;
-    }
-  }, [planKey]);
+  const [formSent, setFormSent] = useState(false);
+  const [formError, setFormError] = useState(false);
+  const [formSubmitting, setFormSubmitting] = useState(false);
 
   useEffect(() => {
     document.title = `${t("pkg.doc.title")} | TechSol Georgia`;
@@ -60,6 +52,27 @@ export default function PackageRequestClient({ planKey: rawPlan, sentOk }) {
 
   const mailSubject = t("pkg.mail_subject").replace("%s", planLabel);
   const defaultMessage = t(`pkg.msg.${planKey}`);
+
+  async function handlePackageSubmit(e) {
+    e.preventDefault();
+    setFormError(false);
+    setFormSubmitting(true);
+
+    try {
+      await submitWeb3Form(e.currentTarget);
+      e.currentTarget.reset();
+      setFormSent(true);
+    } catch {
+      setFormError(true);
+    } finally {
+      setFormSubmitting(false);
+    }
+  }
+
+  const formErrorText =
+    lang === "en"
+      ? "Could not send. Please try again or email us directly."
+      : "გაგზავნა ვერ მოხერხდა. სცადეთ თავიდან ან მოგვწერეთ ელფოსტით.";
 
   return (
     <main>
@@ -112,24 +125,23 @@ export default function PackageRequestClient({ planKey: rawPlan, sentOk }) {
           <div className="contact-intro">
             <h2 className="section-title">{t("pkg.confirm.title")}</h2>
             <p className="section-subtitle">{t("pkg.confirm.sub")}</p>
-            {sentOk ? (
+            {formSent ? (
               <p className="contact-success" role="status">
                 {t("pkg.success")}
               </p>
             ) : null}
+            {formError ? (
+              <p className="contact-form-note" role="alert">
+                {formErrorText}
+              </p>
+            ) : null}
           </div>
 
-          <form className="contact-form" action={WEB3FORMS_ACTION} method="POST">
+          <form className="contact-form" onSubmit={handlePackageSubmit}>
             <input
               type="hidden"
               name="access_key"
               value={WEB3FORMS_ACCESS_KEY}
-            />
-            <input
-              ref={redirectFieldRef}
-              type="hidden"
-              name="redirect"
-              defaultValue=""
             />
             <input type="hidden" name="subject" value={mailSubject} />
             <input
@@ -170,8 +182,12 @@ export default function PackageRequestClient({ planKey: rawPlan, sentOk }) {
                 defaultValue={defaultMessage}
               />
             </label>
-            <button type="submit" className="btn btn-primary btn-block">
-              {t("pkg.form.submit")}
+            <button
+              type="submit"
+              className="btn btn-primary btn-block"
+              disabled={formSubmitting}
+            >
+              {formSubmitting ? "…" : t("pkg.form.submit")}
             </button>
             <p className="contact-email">
               <span>{t("pkg.form.mailto")}</span>
