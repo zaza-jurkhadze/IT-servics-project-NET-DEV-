@@ -1,14 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useLang } from "@/context/LangContext";
-import {
-  CONTACT_EMAIL,
-  WEB3FORMS_ACCESS_KEY,
-  WEB3FORMS_ACTION,
-} from "@/constants";
+import { CONTACT_EMAIL, WEB3FORMS_ACCESS_KEY } from "@/constants";
+import { submitWeb3Form } from "@/lib/web3forms";
 
 const PRICE_BASIC_KEYS = [1, 2, 3, 4, 5, 6];
 const PRICE_STD_KEYS = [1, 2, 3, 4, 5, 6, 7, 8];
@@ -37,11 +34,11 @@ function scrollToHashFromLocation() {
 
 export default function Home() {
   const { t, lang } = useLang();
-  const redirectFieldRef = useRef(null);
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const sentOk = searchParams.get("sent") === "1";
   const [activeServiceGroup, setActiveServiceGroup] = useState("infra");
+  const [formSent, setFormSent] = useState(false);
+  const [formError, setFormError] = useState(false);
+  const [formSubmitting, setFormSubmitting] = useState(false);
 
   useEffect(() => {
     document.title = t("doc.title");
@@ -53,13 +50,6 @@ export default function Home() {
     }
     meta.setAttribute("content", t("doc.desc"));
   }, [t, lang]);
-
-  useEffect(() => {
-    const base = `${window.location.origin}${window.location.pathname}`;
-    if (redirectFieldRef.current) {
-      redirectFieldRef.current.value = `${base.split("#")[0]}?sent=1#კონტაქტი`;
-    }
-  }, []);
 
   useEffect(() => {
     if (pathname !== "/") return;
@@ -81,6 +71,27 @@ export default function Home() {
       : "TechSol Georgia — ახალი მიმართვა";
  
   const formNote = t("contact.formNote").trim();
+
+  async function handleContactSubmit(e) {
+    e.preventDefault();
+    setFormError(false);
+    setFormSubmitting(true);
+
+    try {
+      await submitWeb3Form(e.currentTarget);
+      e.currentTarget.reset();
+      setFormSent(true);
+    } catch {
+      setFormError(true);
+    } finally {
+      setFormSubmitting(false);
+    }
+  }
+
+  const formErrorText =
+    lang === "en"
+      ? "Could not send. Please try again or email us directly."
+      : "გაგზავნა ვერ მოხერხდა. სცადეთ თავიდან ან მოგვწერეთ ელფოსტით.";
 
   return (
     <main>
@@ -385,30 +396,25 @@ export default function Home() {
               <span>{t("contact.emailLabel")} </span>
               <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
             </p>
-            {sentOk && (
+            {formSent && (
               <p className="contact-success" role="status">
                 {t("contact.success")}
+              </p>
+            )}
+            {formError && (
+              <p className="contact-form-note" role="alert">
+                {formErrorText}
               </p>
             )}
             {formNote ? (
               <p className="contact-form-note">{formNote}</p>
             ) : null}
           </div>
-          <form
-            className="contact-form"
-            action={WEB3FORMS_ACTION}
-            method="POST"
-          >
+          <form className="contact-form" onSubmit={handleContactSubmit}>
             <input
               type="hidden"
               name="access_key"
               value={WEB3FORMS_ACCESS_KEY}
-            />
-            <input
-              ref={redirectFieldRef}
-              type="hidden"
-              name="redirect"
-              defaultValue=""
             />
             <input type="hidden" name="subject" value={subject} />
             <input
@@ -453,8 +459,12 @@ export default function Home() {
                 placeholder={t("ph.message")}
               />
             </label>
-            <button type="submit" className="btn btn-primary btn-block">
-              {t("form.submit")}
+            <button
+              type="submit"
+              className="btn btn-primary btn-block"
+              disabled={formSubmitting}
+            >
+              {formSubmitting ? "…" : t("form.submit")}
             </button>
           </form>
         </div>
