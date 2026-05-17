@@ -39,6 +39,7 @@ export default function Home() {
   const [formSent, setFormSent] = useState(false);
   const [formError, setFormError] = useState(false);
   const [formSubmitting, setFormSubmitting] = useState(false);
+  const [formKey, setFormKey] = useState(0);
 
   useEffect(() => {
     document.title = t("doc.title");
@@ -80,11 +81,7 @@ export default function Home() {
     try {
       await submitWeb3Form(e.currentTarget);
       setFormSent(true);
-      try {
-        e.currentTarget.reset();
-      } catch {
-        /* reset optional */
-      }
+      setFormKey((k) => k + 1);
     } catch {
       setFormError(true);
     } finally {
@@ -414,7 +411,11 @@ export default function Home() {
               <p className="contact-form-note">{formNote}</p>
             ) : null}
           </div>
-          <form className="contact-form" onSubmit={handleContactSubmit}>
+          <form
+            key={formKey}
+            className="contact-form"
+            onSubmit={handleContactSubmit}
+          >
             <input
               type="hidden"
               name="access_key"
