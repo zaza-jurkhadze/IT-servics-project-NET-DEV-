@@ -42,6 +42,12 @@ export default function Home() {
   const [formKey, setFormKey] = useState(0);
 
   useEffect(() => {
+    if (!formSent) return;
+    const id = setTimeout(() => setFormSent(false), 5000);
+    return () => clearTimeout(id);
+  }, [formSent]);
+
+  useEffect(() => {
     document.title = t("doc.title");
     let meta = document.querySelector('meta[name="description"]');
     if (!meta) {
